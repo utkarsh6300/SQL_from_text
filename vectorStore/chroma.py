@@ -1,5 +1,5 @@
 import json
-from typing import List
+from typing import List, Optional
 
 import chromadb
 import pandas as pd
@@ -60,40 +60,63 @@ class ChromaDB_VectorStore():
             return embedding[0]
         return embedding
 
-    def add_question_sql(self, question: str, sql: str, **kwargs) -> str:
-        question_sql_json = json.dumps(
-            {
-                "question": question,
-                "sql": sql,
-            },
-            ensure_ascii=False,
-        )
-        id = deterministic_uuid(question_sql_json) + "-sql"
-        self.sql_collection.add(
-            documents=question_sql_json,
-            embeddings=self.generate_embedding(question_sql_json),
-            ids=id,
-        )
+    def add_question_sql(self, question: str, sql: str, **kwargs) -> Optional[str]:
+        """
+        Add a question-SQL pair to the vector store.
+        Returns the ID if successful, None if failed.
+        """
+        try:
+            question_sql_json = json.dumps(
+                {
+                    "question": question,
+                    "sql": sql,
+                },
+                ensure_ascii=False,
+            )
+            id = deterministic_uuid(question_sql_json) + "-sql"
+            self.sql_collection.add(
+                documents=question_sql_json,
+                embeddings=self.generate_embedding(question_sql_json),
+                ids=id,
+            )
+            return id
+        except Exception as e:
+            print(f"Error adding question-SQL pair: {str(e)}")
+            return None
 
-        return id
+    def add_ddl(self, ddl: str, **kwargs) -> Optional[str]:
+        """
+        Add DDL statement to the vector store.
+        Returns the ID if successful, None if failed.
+        """
+        try:
+            id = deterministic_uuid(ddl) + "-ddl"
+            self.ddl_collection.add(
+                documents=ddl,
+                embeddings=self.generate_embedding(ddl),
+                ids=id,
+            )
+            return id
+        except Exception as e:
+            print(f"Error adding DDL: {str(e)}")
+            return None
 
-    def add_ddl(self, ddl: str, **kwargs) -> str:
-        id = deterministic_uuid(ddl) + "-ddl"
-        self.ddl_collection.add(
-            documents=ddl,
-            embeddings=self.generate_embedding(ddl),
-            ids=id,
-        )
-        return id
-
-    def add_documentation(self, documentation: str, **kwargs) -> str:
-        id = deterministic_uuid(documentation) + "-doc"
-        self.documentation_collection.add(
-            documents=documentation,
-            embeddings=self.generate_embedding(documentation),
-            ids=id,
-        )
-        return id
+    def add_documentation(self, documentation: str, **kwargs) -> Optional[str]:
+        """
+        Add documentation to the vector store.
+        Returns the ID if successful, None if failed.
+        """
+        try:
+            id = deterministic_uuid(documentation) + "-doc"
+            self.documentation_collection.add(
+                documents=documentation,
+                embeddings=self.generate_embedding(documentation),
+                ids=id,
+            )
+            return id
+        except Exception as e:
+            print(f"Error adding documentation: {str(e)}")
+            return None
 
     def get_training_data(self, **kwargs) -> pd.DataFrame:
         sql_data = self.sql_collection.get()
@@ -231,25 +254,46 @@ class ChromaDB_VectorStore():
             return documents
 
     def get_similar_question_sql(self, question: str, **kwargs) -> list:
-        return ChromaDB_VectorStore._extract_documents(
-            self.sql_collection.query(
+        """
+        Get similar SQL queries for a given question.
+        Includes error handling and validation.
+        """
+        try:
+            results = self.sql_collection.query(
                 query_texts=[question],
                 n_results=self.n_results_sql,
             )
-        )
+            return ChromaDB_VectorStore._extract_documents(results)
+        except Exception as e:
+            print(f"Error retrieving similar queries: {str(e)}")
+            return []
 
     def get_related_ddl(self, question: str, **kwargs) -> list:
-        return ChromaDB_VectorStore._extract_documents(
-            self.ddl_collection.query(
+        """
+        Get related DDL statements for a given question.
+        Includes error handling and validation.
+        """
+        try:
+            results = self.ddl_collection.query(
                 query_texts=[question],
                 n_results=self.n_results_ddl,
             )
-        )
+            return ChromaDB_VectorStore._extract_documents(results)
+        except Exception as e:
+            print(f"Error retrieving DDL context: {str(e)}")
+            return []
 
     def get_related_documentation(self, question: str, **kwargs) -> list:
-        return ChromaDB_VectorStore._extract_documents(
-            self.documentation_collection.query(
+        """
+        Get related documentation for a given question.
+        Includes error handling and validation.
+        """
+        try:
+            results = self.documentation_collection.query(
                 query_texts=[question],
                 n_results=self.n_results_documentation,
             )
-        )
+            return ChromaDB_VectorStore._extract_documents(results)
+        except Exception as e:
+            print(f"Error retrieving documentation: {str(e)}")
+            return []
