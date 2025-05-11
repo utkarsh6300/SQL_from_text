@@ -1,0 +1,179 @@
+Processing question: Get all documents with the status 'Signed'
+Found 5 similar queries
+Retrieved schema context: 1 items
+Retrieved documentation context: 1 items
+Generating SQL with OpenAI...
+SQL generation successful!
+Question: Get all documents with the status 'Signed'
+Actual SQL: SELECT id, title, created_at FROM documents WHERE status = 'Signed';
+Generated SQL: SELECT id, title, status, created_at FROM documents WHERE status = 'Signed'
+--------------------------------------------------
+
+Processing question: Find envelopes that were completed in the last 7 days
+Found 5 similar queries
+Retrieved schema context: 1 items
+Retrieved documentation context: 1 items
+Generating SQL with OpenAI...
+SQL generation successful!
+Question: Find envelopes that were completed in the last 7 days
+Actual SQL: SELECT id, document_id, completed_at FROM envelopes WHERE completed_at >= NOW() - INTERVAL '7 days';
+Generated SQL: SELECT * FROM envelopes WHERE completed_at >= current_date - interval '7 days'
+--------------------------------------------------
+
+Processing question: List all signers who have not yet signed a document
+Found 5 similar queries
+Retrieved schema context: 1 items
+Retrieved documentation context: 1 items
+Generating SQL with OpenAI...
+SQL generation successful!
+Question: List all signers who have not yet signed a document
+Actual SQL: SELECT name, email, status FROM signers WHERE status IS NULL OR status != 'signed';
+Generated SQL: SELECT name, email, status, signed_at 
+FROM signers 
+WHERE status IS NULL
+--------------------------------------------------
+
+Processing question: Count the number of documents created by each user
+Found 5 similar queries
+Retrieved schema context: 1 items
+Retrieved documentation context: 1 items
+Generating SQL with OpenAI...
+SQL generation successful!
+Question: Count the number of documents created by each user
+Actual SQL: SELECT created_by, COUNT(*) AS document_count FROM documents GROUP BY created_by;
+Generated SQL: SELECT created_by, COUNT(id) AS num_documents
+FROM documents
+GROUP BY created_by;
+--------------------------------------------------
+
+Processing question: Get the list of users who created envelopes but are currently inactive
+Found 5 similar queries
+Retrieved schema context: 1 items
+Retrieved documentation context: 1 items
+Generating SQL with OpenAI...
+SQL generation successful!
+Question: Get the list of users who created envelopes but are currently inactive
+Actual SQL: SELECT u.id, u.name, u.email FROM users u JOIN envelopes e ON u.id = e.created_by WHERE u.is_active = FALSE;
+Generated SQL: SELECT u.id, u.name, u.email
+FROM users u
+WHERE u.id IN (SELECT DISTINCT e.created_by FROM envelopes e)
+AND u.is_active = FALSE;
+--------------------------------------------------
+
+Processing question: Find the most recent audit event for a given envelope
+Found 5 similar queries
+Retrieved schema context: 1 items
+Retrieved documentation context: 1 items
+Generating SQL with OpenAI...
+SQL generation successful!
+Question: Find the most recent audit event for a given envelope
+Actual SQL: SELECT * FROM audit_events WHERE envelope_id = 'your-envelope-id' ORDER BY timestamp DESC LIMIT 1;
+Generated SQL: SELECT * FROM audit_events WHERE envelope_id = 'envelope-id-here' ORDER BY timestamp DESC LIMIT 1;
+--------------------------------------------------
+
+Processing question: Get all envelopes that were declined
+Found 5 similar queries
+Retrieved schema context: 1 items
+Retrieved documentation context: 1 items
+Generating SQL with OpenAI...
+SQL generation successful!
+Question: Get all envelopes that were declined
+Actual SQL: SELECT id, document_id, declined_at FROM envelopes WHERE declined_at IS NOT NULL;
+Generated SQL: SELECT * FROM envelopes WHERE declined_at IS NOT NULL;
+--------------------------------------------------
+
+Processing question: Retrieve OTPs that are still valid (not expired)
+Found 5 similar queries
+Retrieved schema context: 1 items
+Retrieved documentation context: 1 items
+Generating SQL with OpenAI...
+SQL generation successful!
+Question: Retrieve OTPs that are still valid (not expired)
+Actual SQL: SELECT email, otp, expires_at FROM otps WHERE expires_at > NOW();
+Generated SQL: SELECT otp, created_at, expires_at FROM otps WHERE expires_at > NOW();
+--------------------------------------------------
+
+Processing question: List all signers who viewed but did not sign the envelope
+Found 5 similar queries
+Retrieved schema context: 1 items
+Retrieved documentation context: 1 items
+Generating SQL with OpenAI...
+SQL generation successful!
+Question: List all signers who viewed but did not sign the envelope
+Actual SQL: SELECT name, email FROM signers WHERE viewed_at IS NOT NULL AND signed_at IS NULL;
+Generated SQL: SELECT * FROM signers WHERE viewed_at IS NOT NULL AND signed_at IS NULL
+--------------------------------------------------
+
+Processing question: Find all documents that have never been included in an envelope
+Found 5 similar queries
+Retrieved schema context: 1 items
+Retrieved documentation context: 1 items
+Generating SQL with OpenAI...
+SQL generation successful!
+Question: Find all documents that have never been included in an envelope
+Actual SQL: SELECT d.id, d.title FROM documents d LEFT JOIN envelopes e ON d.id = e.document_id WHERE e.id IS NULL;
+Generated SQL: SELECT * 
+FROM documents 
+WHERE id NOT IN (SELECT document_id FROM envelopes)
+--------------------------------------------------
+
+Processing question: Get the number of signature fields per envelope
+Found 5 similar queries
+Retrieved schema context: 1 items
+Retrieved documentation context: 1 items
+Generating SQL with OpenAI...
+SQL generation successful!
+Question: Get the number of signature fields per envelope
+Actual SQL: SELECT envelope_id, COUNT(*) AS total_signature_fields FROM signature_fields GROUP BY envelope_id;
+Generated SQL: SELECT envelope_id, COUNT(*) AS num_signature_fields
+FROM signature_fields
+GROUP BY envelope_id;
+--------------------------------------------------
+
+Processing question: Retrieve all audit events of type 'signed' for a document
+Found 5 similar queries
+Retrieved schema context: 1 items
+Retrieved documentation context: 1 items
+Generating SQL with OpenAI...
+SQL generation successful!
+Question: Retrieve all audit events of type 'signed' for a document
+Actual SQL: SELECT * FROM audit_events WHERE type = 'signed' AND document_id = 'your-document-id';
+Generated SQL: SELECT * FROM audit_events WHERE type = 'signed' AND document_id = 'document-id-here'
+--------------------------------------------------
+
+Processing question: List the top 5 users who created the most envelopes
+Found 5 similar queries
+Retrieved schema context: 1 items
+Retrieved documentation context: 1 items
+Generating SQL with OpenAI...
+SQL generation successful!
+Question: List the top 5 users who created the most envelopes
+Actual SQL: SELECT created_by, COUNT(*) AS envelope_count FROM envelopes GROUP BY created_by ORDER BY envelope_count DESC LIMIT 5;
+Generated SQL: SELECT created_by, COUNT(id) AS envelope_count
+FROM envelopes
+GROUP BY created_by
+ORDER BY envelope_count DESC
+LIMIT 5;
+--------------------------------------------------
+
+Processing question: Get signers who declined to sign a document
+Found 5 similar queries
+Retrieved schema context: 1 items
+Retrieved documentation context: 1 items
+Generating SQL with OpenAI...
+SQL generation successful!
+Question: Get signers who declined to sign a document
+Actual SQL: SELECT s.name, s.email, s.declined_at FROM signers s JOIN envelopes e ON s.envelope_id = e.id WHERE e.document_id = 'your-document-id' AND s.declined_at IS NOT NULL;
+Generated SQL: SELECT id, name, email, declined_at FROM signers WHERE status = 'Declined'
+--------------------------------------------------
+
+Processing question: Fetch all signature fields on page 1 of a specific envelope
+Found 5 similar queries
+Retrieved schema context: 1 items
+Retrieved documentation context: 1 items
+Generating SQL with OpenAI...
+SQL generation successful!
+Question: Fetch all signature fields on page 1 of a specific envelope
+Actual SQL: SELECT * FROM signature_fields WHERE envelope_id = 'your-envelope-id' AND page = 1;
+Generated SQL: SELECT * FROM signature_fields WHERE envelope_id = 'specific-envelope-id' AND page = 1;
+--------------------------------------------------

@@ -1,0 +1,12 @@
+Query Results Report
+==================================================
+Question: Count the number of documents created by each user and give it in document
+Generated on: 2025-05-07 11:56:21
+--------------------------------------------------
+
+Results:
+created_by | document_count
+---------------------------
+7680eb7a-8507-4b06-9e97-29291c5f8a6a | 2
+22b3d77e-36de-4463-a334-4a5b026edf33 | 4
+57c18556-5f4f-459f-87a1-791331e77db3 | 1

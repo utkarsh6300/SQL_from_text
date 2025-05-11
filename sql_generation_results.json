@@ -1,0 +1,72 @@
+[
+    {
+        "question": "Get all documents with the status 'Signed'",
+        "actual_sql": "SELECT id, title, created_at FROM documents WHERE status = 'Signed';",
+        "generated_sql": "SELECT id, title, status, created_at \nFROM documents \nWHERE status = 'Signed'"
+    },
+    {
+        "question": "Find envelopes that were completed in the last 7 days",
+        "actual_sql": "SELECT id, document_id, completed_at FROM envelopes WHERE completed_at >= NOW() - INTERVAL '7 days';",
+        "generated_sql": "SELECT * FROM envelopes WHERE completed_at >= current_date - interval '7 days'"
+    },
+    {
+        "question": "List all signers who have not yet signed a document",
+        "actual_sql": "SELECT name, email, status FROM signers WHERE status IS NULL OR status != 'signed';",
+        "generated_sql": "SELECT name, email, status, signed_at\nFROM signers\nWHERE status IS NULL"
+    },
+    {
+        "question": "Count the number of documents created by each user",
+        "actual_sql": "SELECT created_by, COUNT(*) AS document_count FROM documents GROUP BY created_by;",
+        "generated_sql": "SELECT created_by, COUNT(id) AS num_documents_created\nFROM documents\nGROUP BY created_by;"
+    },
+    {
+        "question": "Get the list of users who created envelopes but are currently inactive",
+        "actual_sql": "SELECT u.id, u.name, u.email FROM users u JOIN envelopes e ON u.id = e.created_by WHERE u.is_active = FALSE;",
+        "generated_sql": "SELECT u.id, u.name, u.email\nFROM users u\nJOIN envelopes e ON u.id = e.created_by\nWHERE u.is_active = FALSE;"
+    },
+    {
+        "question": "Find the most recent audit event for a given envelope",
+        "actual_sql": "SELECT * FROM audit_events WHERE envelope_id = 'your-envelope-id' ORDER BY timestamp DESC LIMIT 1;",
+        "generated_sql": "SELECT * FROM audit_events WHERE envelope_id = 'envelope-id-here' ORDER BY timestamp DESC LIMIT 1;"
+    },
+    {
+        "question": "Get all envelopes that were declined",
+        "actual_sql": "SELECT id, document_id, declined_at FROM envelopes WHERE declined_at IS NOT NULL;",
+        "generated_sql": "SELECT * FROM envelopes WHERE declined_at IS NOT NULL;"
+    },
+    {
+        "question": "Retrieve OTPs that are still valid (not expired)",
+        "actual_sql": "SELECT email, otp, expires_at FROM otps WHERE expires_at > NOW();",
+        "generated_sql": "SELECT email, otp, expires_at, created_at FROM otps WHERE expires_at > NOW();"
+    },
+    {
+        "question": "List all signers who viewed but did not sign the envelope",
+        "actual_sql": "SELECT name, email FROM signers WHERE viewed_at IS NOT NULL AND signed_at IS NULL;",
+        "generated_sql": "SELECT id, name, email, viewed_at FROM signers WHERE envelope_id = 'envelope-id-here' AND viewed_at IS NOT NULL AND signed_at IS NULL"
+    },
+    {
+        "question": "Find all documents that have never been included in an envelope",
+        "actual_sql": "SELECT d.id, d.title FROM documents d LEFT JOIN envelopes e ON d.id = e.document_id WHERE e.id IS NULL;",
+        "generated_sql": "SELECT * \nFROM documents \nWHERE id NOT IN (SELECT document_id FROM envelopes)"
+    },
+    {
+        "question": "Get the number of signature fields per envelope",
+        "actual_sql": "SELECT envelope_id, COUNT(*) AS total_signature_fields FROM signature_fields GROUP BY envelope_id;",
+        "generated_sql": "SELECT envelope_id, COUNT(*) AS num_signature_fields\nFROM signature_fields\nGROUP BY envelope_id;"
+    },
+    {
+        "question": "Retrieve all audit events of type 'signed' for a document",
+        "actual_sql": "SELECT * FROM audit_events WHERE type = 'signed' AND document_id = 'your-document-id';",
+        "generated_sql": "SELECT * FROM audit_events WHERE type = 'signed' AND document_id = 'document-id-here'"
+    },
+    {
+        "question": "List the top 5 users who created the most envelopes",
+        "actual_sql": "SELECT created_by, COUNT(*) AS envelope_count FROM envelopes GROUP BY created_by ORDER BY envelope_count DESC LIMIT 5;",
+        "generated_sql": "SELECT created_by, COUNT(id) AS envelope_count\nFROM envelopes\nGROUP BY created_by\nORDER BY envelope_count DESC\nLIMIT 5;"
+    },
+    {
+        "question": "Get signers who declined to sign a document",
+        "actual_sql": "SELECT s.name, s.email, s.declined_at FROM signers s JOIN envelopes e ON s.envelope_id = e.id WHERE e.document_id = 'your-document-id' AND s.declined_at IS NOT NULL;",
+        "generated_sql": "SELECT * FROM signers WHERE status = 'Declined'"
+    }
+]

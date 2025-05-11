@@ -39,12 +39,14 @@ class SQLGenerator:
         Args:
             examples (List[dict]): List of dictionaries containing 'question' and 'sql' keys
         """
+        print(f"\nTraining with {len(examples)} examples...")
         for example in examples:
             self.vector_store.add_question_sql(
                 question=example["question"],
                 sql=example["sql"]
             )
-    
+        print("Training complete!")
+
     def add_schema_context(self, schema: str) -> None:
         """
         Add database schema to the vector store for context.
@@ -73,20 +75,26 @@ class SQLGenerator:
         Returns:
             str: Generated SQL query
         """
+        print(f"\nProcessing question: {question}")
+        
         # Get similar questions and their SQL queries
         similar_queries = self.vector_store.get_similar_question_sql(question)
+        print(f"Found {len(similar_queries) if similar_queries else 0} similar queries")
         
         # Get related schema information
         schema_context = self.vector_store.get_related_ddl(question)
+        print(f"Retrieved schema context: {len(schema_context) if schema_context else 0} items")
         
         # Get related documentation
         docs_context = self.vector_store.get_related_documentation(question)
+        print(f"Retrieved documentation context: {len(docs_context) if docs_context else 0} items")
         
         # Prepare context for OpenAI
         context = self._prepare_context(similar_queries, schema_context, docs_context)
         
         # Generate SQL using OpenAI
         try:
+            print("Generating SQL with OpenAI...")
             response = self.client.chat.completions.create(
                 model="gpt-3.5-turbo",
                 messages=[
@@ -102,9 +110,13 @@ Return only the SQL query without any explanation."""}
                 temperature=0.1,
                 max_tokens=500
             )
-            return response.choices[0].message.content.strip()
+            generated_sql = response.choices[0].message.content.strip()
+            print("SQL generation successful!")
+            return generated_sql
         except Exception as e:
-            return f"Error generating SQL: {str(e)}"
+            error_msg = f"Error generating SQL: {str(e)}"
+            print(error_msg)
+            return error_msg
     
     def _prepare_context(self, similar_queries: Optional[List[dict]], 
                         schema_context: Optional[List[str]], 
